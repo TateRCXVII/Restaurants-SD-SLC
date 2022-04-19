@@ -1,0 +1,157 @@
+---
+title: "Assignment01"
+author: "Tate Reynolds"
+date: "1/25/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+As one of the hottest housing markets continues to rage, many wonder what hot-spots have the best food. Of course, outside of neighborhoods, environment, and surroundings, food selection is a key contributing factor for those looking to move anywhere. In this study, we're researching the quality of restaurants between two booming cities -- San Diego, CA,and Salt Lake City, UT, in an effor to better inform those playing with the idea of purchasing an overpriced house to either surf or ski. An aside, **if you're already from California and reading this, the snow in Utah sucks and Salt Lake City has terrible restaurants.** Ok -- now let's get on with the rest of the analysis.
+
+The collection of this data came from two sources -- Google Maps and Yelp. Ideally, I would've had time to scrape hundreds of reviews and restaurants from Google's Places API, but seeing as though I have three other coding projects to be working on, that idea will have to wait for a future assignment. Both Google Maps and Yelp allow the user to drag a map around and search specific areas in and around the two cities. Both seem to rate their results on relevance or popularity, a factor that will be touched on later. Both services use a 5-star rating system and track how many patrons have left a review. And, lastly, both services provide an expense rating out of four $ ($ being the cheapest, $$$$ being the most expensive). These services, however, also offer their limitations. It's frustrating that both provide very limited lists of restaurants (perhaps catering more to the indecisive girlfriend than the eager statistician), which created a tedious and manual data-collection tactic -- something easily remedied by scraping the API. But, I collected data in a spreadsheet file, keeping track of the city, the restaurant name, the rating, the expense rating, if the restaurant had over 1,000 reviews, and what type of cuisine the restaurant serves. All of these factors bring together a cohesive perspective and will allow us to really understand if San Diego has better restaurants than Salt Lake City.
+
+# Data
+
+I hope to gather as simple a random sample I can from Google and Yelp. I won't be manually searching any restaurants, filtering by stars or cost or type, or being particular as to which restaurants I enter into the spreadsheet. Whatever restaurant Google and Yelp recommend to me I will enter in to the sheet. By doing this, I'm hoping to remove any city-based bias as I will replicate this process in each city. On top of this, I intend to search all areas of each city, from north to south and east to west. This will give a broad sample group indicative of the entire population, and also aid in a normal sampling size.
+
+```{r}
+restaurant_data <- read.csv('Restaurant Data - Sheet1.csv')
+head(restaurant_data)
+```
+
+## Variables
+
+#### City and Name
+
+The variables I'm considering in this process is first (obviously) the city -- either San Diego or Salt Lake City -- and the restaurant names. This is primarily for record keeping and to attribute the ratings to a specific restaurant in case any of you reading would like to visit some of the higher (or lower) rated restaurants in this data. 
+
+#### Rating and Review Count
+
+Then, the primary factor for how good a restaurant is is its reviews and ratings. Funnily enough, all the restaurants that were recommended to me by Yelp or Google were above 4.0 stars, so I took this and factored in how many reviews were left. If a restaurant received more than 1000 reviews, it is marked with a Y. I included this variable to further solidify that a restaurant's rating is well deserved, which will help as the best restaurants as these two cities go head-to-head. 
+
+#### Expense
+
+The next variable I decided to include is the price-point. Both Yelp and Google measure their price estimation for the restaurants in a dollar sign scale, as mentioned above. $ is the cheapest while $ $ $ $ is the most expensive. This is to measure if more expensive restaurants tend to be higher rated, or if money plays a factor in peoples reviews/ratings.
+
+#### Food Genre
+
+Lastly, I wanted to keep track of the food genre. From Italian to Hispanic to Scandinavian and everything in between, both of these cities offer a wide range of cultures and foods. This will give us a deeper insight into how different influences and fusions could perhaps create better restaurants.
+
+# Analysis
+
+As I introduce the bulk of this data and undertake analyzing it, consider how ratings, reviews, and expense could make a good restaurant. From your experience, how have these three variable lined up, or not, to create a pleasant dining experience? The key analytic components will be the mean of the reviews per city to provide an overall view of how Google and Yelp recommend restaurants, provide the average $ count per city, and display the spread of the different food types. From this, the popularity of each restaurant, based off of the reviews, will be factored in to not only support the rating for each restaurant, but to compare how popular many of these restaurants are.
+
+```{r, echo=FALSE}
+san_diego_data = restaurant_data[1:29,]
+
+utah_data = restaurant_data[32:62,]
+```
+
+## Means and Boxplots for Ratings in Each City
+#### Mean Rating in San Diego
+```{r sd ratings, echo=FALSE}
+mean(san_diego_data$Rating)
+```
+#### Mean Rating in SLC
+```{r slc ratings, echo=FALSE}
+mean(utah_data$Rating)
+```
+##### Boxplots
+```{r}
+boxplot(san_diego_data$Rating)
+boxplot(utah_data$Rating)
+```
+
+The above data shows the average rating of the SRS of restaurants from each city. As you can see, from a SRS of size 30, San Diego has a higher average rating than SLC by .07 stars -- a very minuscule difference. However, as shown by the box plots, the distribution of ratings is much tighter for San Diego than for SLC. The majority of restaurants hover around the 4.5 stars range while SLC tells a story of a wide spread of ratings across a tighter range with no outliers.
+
+If you must know, the San Diego restaurant rated 5.0 stars is called Common Stock and serves American food. Notably, San Diego also has the lowest rated restaurant out of the two cities -- Dickey's BBQ Pit comes in at 4 stars. BBQ is better served in the South no doubt.
+
+## Average Pricepoint (in $)
+#### Average Pricepoint in San Diego
+```{r san diego pp, echo=FALSE}
+mean(san_diego_data$Expense)
+```
+
+#### Average Pricepoint in SLC
+```{r utah pp, echo=FALSE}
+mean(utah_data$Expense)
+```
+
+##### Plots
+```{r}
+hist(san_diego_data$Expense)
+hist(utah_data$Expense)
+```
+
+The above histograms show that both cities' restaurants trend towards two $ for how expensive they are. San Diego has a few more expensive restaurants than Salt Lake, and Salt Lake has more mid ranged $$ rated restaurants. So, if you're looking for a nightly wine-and-dine affair, San Diego would probably be your better bet. But, if you're looking for hipster, homey, and all-around decent food for a cheap price, Salt Lake has your name written all over it.
+
+## Expense vs. Rating
+```{r}
+expense_vs_rating <- data.frame(restaurant_data$Rating, restaurant_data$Expense)
+library(ggplot2)
+ggplot(expense_vs_rating, aes(restaurant_data$Rating, restaurant_data$Expense)) + geom_jitter(position = position_jitter(width = .1))+
+    stat_summary(fun.y = "mean", geom = "point", color = "red", size = 3)
+
+```
+
+The above scatterplot shows, in general between the two cities, that there is hardly any correlation between rating and expense. In fact, more often than not, the "mid" restaurants range the most in expense. The red dots show the average for each grouping of ratings, showing that across the board, the average expense for restaurants is in fact $$.
+
+## Mosaic Charts for Food Type per City
+```{r}
+sd_type <- table(san_diego_data$Type, san_diego_data$Expense)
+sd_type
+
+mosaicplot(sd_type, xlab='Expense', ylab='Type',
+           main='Types of Restaurants in San Diego', col='steelblue',  las=1, dir=c("h", "v"))
+```
+
+```{r}
+ut_type <- table(utah_data$Type, utah_data$Expense)
+ut_type
+
+mosaicplot(ut_type, xlab='Expense', ylab='Type',
+           main='Types of Restaurants in Salt Lake City', col='steelblue', las=1, dir=c("h", "v"))
+```
+
+#### Interpreting Mosaic Graphs
+The above graphs can be interpreted as the wider bars having a higher count (i.e. more restaurants with this type in the city) and the lines correlate with the expense of the restaurant.
+
+The above mosaic graphs provide a little insight into how diverse the restaurant selection is in both of these cities. San Diego has a large prevalence of American, Sea, and Mexican foods. Understanding that the market there is saturated with these types could play into how people might rate them more harshly than more diverse restaurants.
+
+In Salt Lake City, however, there are a lot of different food types, which is understandable given the high volume of immigrants Salt Lake City takes in. To give my opinion, the greater diversity there is in a community, the better the community can become. The applies to restaurants as well.
+
+## San Diego Type vs. Rating
+```{r}
+sd_type <- table(san_diego_data$Type, san_diego_data$Rating)
+
+mosaicplot(sd_type, xlab='Expense', ylab='Type',
+           main='Types of Restaurants in San Diego vs. Rating', col='steelblue',  las=1, dir=c("h", "v"))
+```
+
+## Salt Lake City Type vs. Rating
+
+```{r}
+ut_type <- table(utah_data$Type, utah_data$Rating)
+
+mosaicplot(ut_type, xlab='Rating', ylab='Type',
+           main='Types of Restaurants in Salt Lake City vs. Rating', col='steelblue', las=1, dir=c("h", "v"))
+```
+
+
+These mosaic plots show how the different restaurants tend to be rating in each of the cities. In San Diego, there are only a few types of restaurants with higher ratings: American, Italian, Seafood, and Creole, for example.
+
+In Salt Lake City, while no restaurant reaches a 5 star rating, there are more restaurants which reach the higher range of ratings: French, Hawaiian, Japanese, Scandinavian, etc.
+
+
+# Conclusion
+
+This study certainly isn't perfect. There were many degrading factors which came into play when gathering this data, including a reliance on Yelp and Google to be unbiased or to ensure their data is 100% accurate, not taking into account the surrounding population (i.g. students, wealth, culture, etc.), not considering the total number of restaurants in each city, and also perhaps the more imposing fact that people live in or travel to these cities for completely unrelated reasons. Could it be that the restaurants in each of these cities are just *different*?
+
+The limitations mentioned above are tough to spot in the data because data can't easily be gathered on them from Google and Yelp. The review system, while very mainstream, leaves out many bystanders who didn't feel like leaving a review. So, the review number isn't indicative of the overall population, nor is the star-rating system. However, much like Google and Yelp, I did the best I could with the resources with which I was provided.
+
+In conclusion, go to San Diego for food and please leave Utah alone. I live in Salt Lake and can attest, Utah is just a flat desert.
